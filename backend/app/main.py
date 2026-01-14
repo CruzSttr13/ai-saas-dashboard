@@ -1,16 +1,33 @@
 from fastapi import FastAPI
-from app.api.v1.endpoints import router as api_router
-from app.core.config import settings
+from app.api.v1 import users
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    # Genera la documentación OpenAPI en esta ruta
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    title="AI SaaS Dashboard",
+    description="Backend para el Dashboard AI SaaS - Día 2 completado",
+    version="1.0.0"
 )
 
-# Conectamos nuestras rutas con el prefijo /api/v1
-app.include_router(api_router, prefix=settings.API_V1_STR)
+# Incluimos las rutas de usuarios con sus respectivos prefijos y etiquetas
+app.include_router(users.router)
 
-@app.get("/")
-def root():
-    return {"message": "Bienvenido al core del AI SaaS Dashboard. Ve a /docs para la API."}
+@app.get("/", tags=["General"])
+def read_root():
+    """
+    Endpoint de bienvenida para verificar que el servidor está en línea.
+    """
+    return {
+        "status": "online",
+        "message": "Bienvenido al AI SaaS Dashboard 2026",
+        "day": 2
+    }
+
+# Si quieres mantener el endpoint de prueba de base de datos de ayer, 
+# asegúrate de que app.core.db tenga la lógica de conexión.
+@app.get("/db-test", tags=["General"])
+def test_db_connection():
+    from app.core.db import engine
+    try:
+        with engine.connect() as connection:
+            return {"status": "success", "detail": "Conexión a PostgreSQL en Fedora exitosa"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
