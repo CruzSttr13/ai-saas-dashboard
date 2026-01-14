@@ -1,27 +1,39 @@
 from fastapi import FastAPI
-from app.api.v1 import users, auth  # Importamos ambos módulos juntos
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1 import users, auth
 
-# 1. Creamos la instancia de FastAPI (Esto debe ir antes de usar 'app')
+# 1. Instancia única de FastAPI
 app = FastAPI(
     title="AI SaaS Dashboard",
-    description="Backend para el Dashboard AI SaaS - Día 3: Autenticación",
+    description="Backend para el Dashboard AI SaaS - Día 4: Frontend Integration",
     version="1.0.0"
 )
 
-# 2. Ahora que 'app' ya existe, incluimos los routers
-app.include_router(users.router, prefix="/api/v1", tags=["Users"])
-app.include_router(auth.router, prefix="/api/v1", tags=["Auth"])
+# 2. Configuración de CORS (Fundamental para que Next.js funcione)
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
-# 3. Endpoints generales
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 3. Inclusión de Routers (Sin duplicados)
+app.include_router(auth.router, prefix="/api/v1", tags=["Auth"])
+app.include_router(users.router, prefix="/api/v1", tags=["Users"])
+
+# 4. Endpoints generales
 @app.get("/", tags=["General"])
 def read_root():
-    """
-    Endpoint de bienvenida para verificar que el servidor está en línea.
-    """
     return {
         "status": "online",
         "message": "Bienvenido al AI SaaS Dashboard 2026",
-        "day": 3  # ¡Ya estamos en el día 3!
+        "day": 4 
     }
 
 @app.get("/db-test", tags=["General"])
