@@ -1,15 +1,18 @@
 from fastapi import FastAPI
-from app.api.v1 import users
+from app.api.v1 import users, auth  # Importamos ambos módulos juntos
 
+# 1. Creamos la instancia de FastAPI (Esto debe ir antes de usar 'app')
 app = FastAPI(
     title="AI SaaS Dashboard",
-    description="Backend para el Dashboard AI SaaS - Día 2 completado",
+    description="Backend para el Dashboard AI SaaS - Día 3: Autenticación",
     version="1.0.0"
 )
 
-# Incluimos las rutas de usuarios con sus respectivos prefijos y etiquetas
-app.include_router(users.router)
+# 2. Ahora que 'app' ya existe, incluimos los routers
+app.include_router(users.router, prefix="/api/v1", tags=["Users"])
+app.include_router(auth.router, prefix="/api/v1", tags=["Auth"])
 
+# 3. Endpoints generales
 @app.get("/", tags=["General"])
 def read_root():
     """
@@ -18,11 +21,9 @@ def read_root():
     return {
         "status": "online",
         "message": "Bienvenido al AI SaaS Dashboard 2026",
-        "day": 2
+        "day": 3  # ¡Ya estamos en el día 3!
     }
 
-# Si quieres mantener el endpoint de prueba de base de datos de ayer, 
-# asegúrate de que app.core.db tenga la lógica de conexión.
 @app.get("/db-test", tags=["General"])
 def test_db_connection():
     from app.core.db import engine
