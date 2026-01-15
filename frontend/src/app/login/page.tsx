@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-// ... resto de imports
+import Cookies from "js-cookie"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,16 +36,23 @@ export default function LoginPage() {
       })
 
       if (!response.ok) {
-        throw new Error("Credenciales incorrectas")
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.detail || "Credenciales incorrectas")
       }
 
       const data = await response.json()
       
-      // Guardamos el token en localStorage por ahora
-      localStorage.setItem("token", data.access_token)
+      // ✅ Guardamos el token en Cookies (necesario para el Middleware)
+      // 'expires: 1' significa que la sesión dura 24 horas
+      Cookies.set("token", data.access_token, { 
+        expires: 1,
+        path: '/',
+        sameSite: 'lax' 
+      })
       
-      // Redirigimos al dashboard (que crearemos en un momento)
+      // Redirigimos al dashboard
       router.push("/dashboard")
+      router.refresh()
       
     } catch (err: any) {
       setError(err.message)
@@ -54,20 +62,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex h-screen w-full items-center justify-center px-4">
+    <div className="flex h-screen w-full items-center justify-center px-4 bg-zinc-50 dark:bg-zinc-950">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Iniciar Sesión</CardTitle>
-          <CardDescription>Usa tus credenciales de Fedora Dev</CardDescription>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Iniciar Sesión</CardTitle>
+          <CardDescription>
+            Introduce tus credenciales para acceder al panel
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="grid gap-4">
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded text-sm">
+                {error}
+              </div>
+            )}
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input 
                 id="email" 
                 type="email" 
+                placeholder="abdul@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required 
@@ -84,7 +99,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Cargando..." : "Entrar"}
+              {loading ? "Verificando..." : "Entrar"}
             </Button>
           </form>
         </CardContent>
