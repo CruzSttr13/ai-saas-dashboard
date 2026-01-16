@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1 import users, auth
-from app.api.v1.endpoints import ai 
-
+from app.api.v1.endpoints import ai, images
 
 app = FastAPI(
     title="AI SaaS Dashboard",
@@ -23,6 +22,7 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/v1", tags=["Auth"])
 app.include_router(users.router, prefix="/api/v1", tags=["Users"])
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"]) # Ruta: /api/v1/ai/chat
+app.include_router(images.router, prefix="/api/v1/images", tags=["Images"])
 
 # 3. Endpoints generales
 @app.get("/", tags=["General"])

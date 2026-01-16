@@ -3,23 +3,18 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { 
-  LayoutDashboard, 
-  MessageSquare, 
-  ImageIcon, 
-  Settings, 
+import {
+  LayoutDashboard,
+  MessageSquare,
+  ImageIcon,
+  Settings,
   Zap,
   LogOut,
   Code
 } from "lucide-react"
 import Cookies from "js-cookie"
 
-const onLogout = () => {
-  Cookies.remove("token") // Borra la cookie
-  localStorage.removeItem("token") // Por si acaso
-  router.push("/login")
-  router.refresh()
-}
+
 
 const routes = [
   {
@@ -58,11 +53,12 @@ export function Sidebar() {
   const router = useRouter()
 
   const onLogout = () => {
-    // 1. Borramos el token de seguridad
+    // 1. Borramos el token de seguridad (Cookie y LocalStorage)
+    Cookies.remove("token")
     localStorage.removeItem("token")
+
     // 2. Redirigimos al usuario al login
-    router.push("/login")
-    // 3. Opcional: Recargar para limpiar estados de React
+    router.replace("/login") // Usamos replace para que no pueda volver atrás
     router.refresh()
   }
 
